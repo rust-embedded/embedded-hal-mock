@@ -86,6 +86,23 @@ where
         self.update_expectations(expected)
     }
 
+    /// Returns whether all expectations have been consumed.
+    pub fn is_consumed(&self) -> bool {
+        self.expected.lock().unwrap().is_empty()
+    }
+
+    /// Wait until all expectations have been consumed or panic if timeout is reached.
+    pub fn wait_for_consumption(&self, timeout: std::time::Duration) {
+        let start = std::time::Instant::now();
+        while start.elapsed() < timeout {
+            if self.is_consumed() {
+                return;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(1));
+        }
+        panic!("Timeout reached while waiting for expectations to be consumed");
+    }
+
     /// Assert that all expectations on a given mock have been consumed.
     pub fn done(&mut self) {
         self.done_impl(true);
@@ -189,6 +206,25 @@ mod tests {
             assert_eq!(mock.next(), None);
 
             mock.done();
+        }
+
+        #[test]
+        fn wait_for_consumption() {
+            let expectations = [0u8, 1u8];
+            let mut mock: Generic<u8> = Generic::new(&expectations);
+            assert!(!mock.is_consumed());
+
+            let mut mock_clone = mock.clone();
+            let handle = thread::spawn(move || {
+                assert_eq!(mock_clone.next(), Some(0u8));
+                assert_eq!(mock_clone.next(), Some(1u8));
+            });
+
+            mock.wait_for_consumption(std::time::Duration::from_millis(1000));
+            assert!(mock.is_consumed());
+            mock.done();
+
+            handle.join().unwrap();
         }
 
         #[test]
