@@ -8,7 +8,7 @@ documentation = "https://docs.rs/embedded-hal-mock"
 keywords = ["hal", "io", "spi", "i2c", "delay"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
-repository = "https://github.com/dbrgn/embedded-hal-mock"
+repository = "https://github.com/rust-embedded/embedded-hal-mock"
 include = [
     "**/*.rs",
     "Cargo.toml",

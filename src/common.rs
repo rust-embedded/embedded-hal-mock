@@ -147,7 +147,7 @@ impl Drop for DoneCallDetector {
         if !self.called && !thread::panicking() {
             let msg = "WARNING: A mock (from embedded-hal-mock) was dropped \
                        without calling the `.done()` method. \
-                       See https://github.com/dbrgn/embedded-hal-mock/issues/34 \
+                       See https://github.com/rust-embedded/embedded-hal-mock/issues/34 \
                        for more details.";
 
             // Note: We cannot use the print macros here, since they get
@@ -193,7 +193,7 @@ mod tests {
 
         #[test]
         #[should_panic(
-            expected = "WARNING: A mock (from embedded-hal-mock) was dropped without calling the `.done()` method. See https://github.com/dbrgn/embedded-hal-mock/issues/34 for more details."
+            expected = "WARNING: A mock (from embedded-hal-mock) was dropped without calling the `.done()` method. See https://github.com/rust-embedded/embedded-hal-mock/issues/34 for more details."
         )]
         fn panic_if_drop_not_called() {
             let expectations = [0u8, 1u8];
