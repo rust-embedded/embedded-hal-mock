@@ -85,7 +85,7 @@ for inclusion in the work by you, as defined in the Apache-2.0 license, shall
 be dual licensed as above, without any additional terms or conditions.
 
 <!-- Badges -->
-[github-actions]: https://github.com/dbrgn/embedded-hal-mock/actions/workflows/ci.yml
-[github-actions-badge]: https://github.com/dbrgn/embedded-hal-mock/actions/workflows/ci.yml/badge.svg
+[github-actions]: https://github.com/rust-embedded/embedded-hal-mock/actions/workflows/ci.yml
+[github-actions-badge]: https://github.com/rust-embedded/embedded-hal-mock/actions/workflows/ci.yml/badge.svg
 [crates-io]: https://crates.io/crates/embedded-hal-mock
 [version-badge]: https://img.shields.io/crates/v/embedded-hal-mock.svg
