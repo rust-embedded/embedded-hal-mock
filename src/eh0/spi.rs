@@ -127,7 +127,7 @@ impl spi::Write<u8> for Mock {
     ///
     /// This will cause an assertion if the write call does not match the next expectation
     fn write(&mut self, buffer: &[u8]) -> Result<(), Self::Error> {
-        let w = self.next().expect("no expectation for spi::write call");
+        let w = self.next_expectation("spi::write call");
         assert_eq!(w.expected_mode, Mode::Write, "spi::write unexpected mode");
         assert_eq!(
             &w.expected_data, &buffer,
@@ -143,7 +143,7 @@ impl FullDuplex<u8> for Mock {
     ///
     /// This will call the nonblocking read/write primitives.
     fn send(&mut self, buffer: u8) -> nb::Result<(), Self::Error> {
-        let data = self.next().expect("no expectation for spi::send call");
+        let data = self.next_expectation("spi::send call");
         assert_eq!(data.expected_mode, Mode::Send, "spi::send unexpected mode");
         assert_eq!(
             data.expected_data[0], buffer,
@@ -156,7 +156,7 @@ impl FullDuplex<u8> for Mock {
     ///
     /// This will call the nonblocking read/write primitives.
     fn read(&mut self) -> nb::Result<u8, Self::Error> {
-        let w = self.next().expect("no expectation for spi::read call");
+        let w = self.next_expectation("spi::read call");
         assert_eq!(w.expected_mode, Mode::Read, "spi::Read unexpected mode");
         assert_eq!(
             1,
@@ -175,7 +175,7 @@ impl spi::Transfer<u8> for Mock {
     ///
     /// This writes the provided response to the buffer and will cause an assertion if the written data does not match the next expectation
     fn transfer<'w>(&mut self, buffer: &'w mut [u8]) -> Result<&'w [u8], Self::Error> {
-        let w = self.next().expect("no expectation for spi::transfer call");
+        let w = self.next_expectation("spi::transfer call");
         assert_eq!(
             w.expected_mode,
             Mode::Transfer,
@@ -202,9 +202,7 @@ impl spi::WriteIter<u8> for Mock {
     where
         WI: IntoIterator<Item = u8>,
     {
-        let w = self
-            .next()
-            .expect("no expectation for spi::write_iter call");
+        let w = self.next_expectation("spi::write_iter call");
         let buffer = words.into_iter().collect::<Vec<_>>();
         assert_eq!(
             w.expected_mode,

@@ -24,6 +24,7 @@ use std::{
 pub struct Generic<T: Clone + Debug + PartialEq> {
     expected: Arc<Mutex<VecDeque<T>>>,
     done_called: Arc<Mutex<DoneCallDetector>>,
+    label: Option<String>,
 }
 
 impl<'a, T: 'a> Generic<T>
@@ -37,14 +38,48 @@ where
     where
         E: IntoIterator<Item = &'a T>,
     {
+        Self::new_inner(expected, None)
+    }
+
+    /// Create a new labeled mock interface.
+    ///
+    /// Labels are included in expectation failure messages to make tests with
+    /// multiple mocks easier to debug.
+    pub fn with_label<E, L>(expected: E, label: L) -> Generic<T>
+    where
+        E: IntoIterator<Item = &'a T>,
+        L: Into<String>,
+    {
+        Self::new_inner(expected, Some(label.into()))
+    }
+
+    fn new_inner<E>(expected: E, label: Option<String>) -> Generic<T>
+    where
+        E: IntoIterator<Item = &'a T>,
+    {
         let mut g = Generic {
             expected: Arc::new(Mutex::new(VecDeque::new())),
             done_called: Arc::new(Mutex::new(DoneCallDetector::new())),
+            label,
         };
 
         g.update_expectations(expected);
 
         g
+    }
+
+    /// Return the next expectation, or panic with a message that includes the
+    /// mock label when one was provided.
+    pub(crate) fn next_expectation(&mut self, call: &str) -> T {
+        self.next()
+            .unwrap_or_else(|| panic!("{}", self.no_expectation_message(call)))
+    }
+
+    fn no_expectation_message(&self, call: &str) -> String {
+        match &self.label {
+            Some(label) => format!("no expectation for {call} on {label}"),
+            None => format!("no expectation for {call}"),
+        }
     }
 
     /// Update expectations on the interface
@@ -211,6 +246,24 @@ mod tests {
             assert_eq!(mock.next(), Some(1u8));
             mock.done();
             mock.done();
+        }
+
+        #[test]
+        #[should_panic(expected = "no expectation for test call")]
+        fn panic_if_next_expectation_missing() {
+            let expectations: [u8; 0] = [];
+            let mut mock: Generic<u8> = Generic::new(&expectations);
+
+            mock.next_expectation("test call");
+        }
+
+        #[test]
+        #[should_panic(expected = "no expectation for test call on my_label")]
+        fn panic_if_labeled_next_expectation_missing() {
+            let expectations: [u8; 0] = [];
+            let mut mock: Generic<u8> = Generic::with_label(&expectations, "my_label");
+
+            mock.next_expectation("test call");
         }
     }
 }

@@ -187,7 +187,7 @@ impl OutputPin for Mock {
 
     /// Drives the pin low
     fn set_low(&mut self) -> Result<(), Self::Error> {
-        let Transaction { kind, err } = self.next().expect("no expectation for pin::set_low call");
+        let Transaction { kind, err } = self.next_expectation("pin::set_low call");
 
         assert_eq!(
             kind,
@@ -203,7 +203,7 @@ impl OutputPin for Mock {
 
     /// Drives the pin high
     fn set_high(&mut self) -> Result<(), Self::Error> {
-        let Transaction { kind, err } = self.next().expect("no expectation for pin::set_high call");
+        let Transaction { kind, err } = self.next_expectation("pin::set_high call");
 
         assert_eq!(
             kind,
@@ -226,7 +226,7 @@ impl InputPin for Mock {
     fn is_high(&self) -> Result<bool, Self::Error> {
         let mut s = self.clone();
 
-        let Transaction { kind, err } = s.next().expect("no expectation for pin::is_high call");
+        let Transaction { kind, err } = s.next_expectation("pin::is_high call");
 
         assert!(kind.is_get(), "expected pin::get");
 
@@ -243,7 +243,7 @@ impl InputPin for Mock {
     fn is_low(&self) -> Result<bool, Self::Error> {
         let mut s = self.clone();
 
-        let Transaction { kind, err } = s.next().expect("no expectation for pin::is_low call");
+        let Transaction { kind, err } = s.next_expectation("pin::is_low call");
 
         assert!(kind.is_get(), "expected pin::get");
 
@@ -264,7 +264,7 @@ impl ToggleableOutputPin for Mock {
 
     /// Toggle the pin low to high or high to low
     fn toggle(&mut self) -> Result<(), Self::Error> {
-        let Transaction { kind, err } = self.next().expect("no expectation for pin::toggle call");
+        let Transaction { kind, err } = self.next_expectation("pin::toggle call");
 
         assert_eq!(kind, TransactionKind::Toggle, "expected pin::toggle");
 
@@ -280,14 +280,14 @@ impl PwmPin for Mock {
 
     fn disable(&mut self) {
         // Note: Error is being ignored, because method doesn't return a result
-        let Transaction { kind, .. } = self.next().expect("no expectation for pin::disable call");
+        let Transaction { kind, .. } = self.next_expectation("pin::disable call");
 
         assert_eq!(kind, TransactionKind::Disable, "expected pin::disable");
     }
 
     fn enable(&mut self) {
         // Note: Error is being ignored, because method doesn't return a result
-        let Transaction { kind, .. } = self.next().expect("no expectation for pin::enable call");
+        let Transaction { kind, .. } = self.next_expectation("pin::enable call");
 
         assert_eq!(kind, TransactionKind::Enable, "expected pin::enable");
     }
@@ -296,7 +296,7 @@ impl PwmPin for Mock {
         let mut s = self.clone();
 
         // Note: Error is being ignored, because method doesn't return a result
-        let Transaction { kind, .. } = s.next().expect("no expectation for pin::get_duty call");
+        let Transaction { kind, .. } = s.next_expectation("pin::get_duty call");
 
         if let TransactionKind::GetDuty(duty) = kind {
             duty
@@ -309,7 +309,7 @@ impl PwmPin for Mock {
         let mut s = self.clone();
 
         // Note: Error is being ignored, because method doesn't return a result
-        let Transaction { kind, .. } = s.next().expect("no expectation for pin::get_max_duty call");
+        let Transaction { kind, .. } = s.next_expectation("pin::get_max_duty call");
 
         if let TransactionKind::GetMaxDuty(max_duty) = kind {
             max_duty
@@ -320,7 +320,7 @@ impl PwmPin for Mock {
 
     fn set_duty(&mut self, duty: Self::Duty) {
         // Note: Error is being ignored, because method doesn't return a result
-        let Transaction { kind, .. } = self.next().expect("no expectation for pin::set_duty call");
+        let Transaction { kind, .. } = self.next_expectation("pin::set_duty call");
 
         assert_eq!(
             kind,

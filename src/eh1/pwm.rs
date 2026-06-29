@@ -96,7 +96,7 @@ impl SetDutyCycle for Mock {
     fn max_duty_cycle(&self) -> u16 {
         let mut s = self.clone();
 
-        let Transaction { kind, err } = s.next().expect("no expectation for max_duty_cycle call");
+        let Transaction { kind, err } = s.next_expectation("max_duty_cycle call");
 
         assert_eq!(err, None, "error not supported by max_duty_cycle!");
 
@@ -107,8 +107,7 @@ impl SetDutyCycle for Mock {
     }
 
     fn set_duty_cycle(&mut self, duty: u16) -> Result<(), Self::Error> {
-        let Transaction { kind, err } =
-            self.next().expect("no expectation for set_duty_cycle call");
+        let Transaction { kind, err } = self.next_expectation("set_duty_cycle call");
 
         assert_eq!(
             kind,
