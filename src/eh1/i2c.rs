@@ -221,8 +221,8 @@ impl I2c for Mock {
             .expect("no pending expectation for i2c::write call");
 
         assert_eq!(e.expected_mode, Mode::Write, "i2c::write unexpected mode");
+        assert_eq!(e.expected_addr, address, "i2c::write address mismatch");
         if !e.ignore_write {
-            assert_eq!(e.expected_addr, address, "i2c::write address mismatch");
             assert_eq!(
                 e.expected_data, bytes,
                 "i2c::write data does not match expectation"
@@ -249,19 +249,18 @@ impl I2c for Mock {
             Mode::WriteRead,
             "i2c::write_read unexpected mode"
         );
+        assert_eq!(e.expected_addr, address, "i2c::write_read address mismatch");
         if !e.ignore_write {
-            assert_eq!(e.expected_addr, address, "i2c::write_read address mismatch");
             assert_eq!(
                 e.expected_data, bytes,
                 "i2c::write_read write data does not match expectation"
             );
-
-            assert_eq!(
-                buffer.len(),
-                e.response_data.len(),
-                "i2c::write_read mismatched response length"
-            );
         }
+        assert_eq!(
+            buffer.len(),
+            e.response_data.len(),
+            "i2c::write_read mismatched response length"
+        );
 
         match e.expected_err {
             Some(err) => Err(err),
@@ -368,6 +367,15 @@ mod test {
     }
 
     #[test]
+    #[should_panic(expected = "i2c::write address mismatch")]
+    fn write_ignore_address_mismatch() {
+        let expectations = [Transaction::write(0xbb, vec![]).with_ignore_write()];
+        let mut i2c = Mock::new(&expectations);
+
+        i2c.write(0xaa, &vec![10, 11, 12]).unwrap();
+    }
+
+    #[test]
     fn read() {
         let expectations = [Transaction::read(0xaa, vec![1, 2])];
         let mut i2c = Mock::new(&expectations);
@@ -404,6 +412,29 @@ mod test {
 
         i2c.done();
     }
+
+    #[test]
+    #[should_panic(expected = "i2c::write_read address mismatch")]
+    fn write_read_ignore_write_address_mismatch() {
+        let expectations = [Transaction::write_read(0xbb, vec![], vec![3, 4]).with_ignore_write()];
+        let mut i2c = Mock::new(&expectations);
+
+        let v = vec![1, 2];
+        let mut buf = vec![0; 2];
+        i2c.write_read(0xaa, &v, &mut buf).unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "i2c::write_read mismatched response length")]
+    fn write_read_ignore_write_response_length_mismatch() {
+        let expectations = [Transaction::write_read(0xaa, vec![], vec![3, 4]).with_ignore_write()];
+        let mut i2c = Mock::new(&expectations);
+
+        let v = vec![1, 2];
+        let mut buf = vec![0; 1];
+        i2c.write_read(0xaa, &v, &mut buf).unwrap();
+    }
+
     #[test]
     fn multiple_transactions() {
         let expectations = [
