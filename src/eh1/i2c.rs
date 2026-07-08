@@ -287,12 +287,17 @@ impl I2c for Mock {
             "i2c::transaction_start unexpected mode"
         );
 
+        let mut transaction_result = Ok(());
+
         for op in operations {
-            match op {
+            transaction_result = match op {
                 i2c::Operation::Read(r) => self.read(address, r),
                 i2c::Operation::Write(w) => self.write(address, w),
+            };
+
+            if transaction_result.is_err() {
+                break;
             }
-            .unwrap();
         }
 
         let w = self
@@ -305,7 +310,7 @@ impl I2c for Mock {
             "i2c::transaction_end unexpected mode"
         );
 
-        Ok(())
+        transaction_result
     }
 }
 
@@ -445,6 +450,40 @@ mod test {
         assert_eq!(v, vec![3, 4]);
 
         i2c.done();
+    }
+
+    #[test]
+    fn transaction_returns_operation_error() {
+        let expectations = [
+            Transaction::transaction_start(0x76),
+            Transaction::write(0x76, vec![0x88]).with_error(ErrorKind::Other),
+            Transaction::transaction_end(0x76),
+        ];
+        let mut i2c = Mock::new(&expectations);
+        let bytes = [0x88];
+        let mut operations = [i2c::Operation::Write(&bytes)];
+
+        let err = i2c.transaction(0x76, &mut operations).unwrap_err();
+        assert_eq!(err, ErrorKind::Other);
+
+        i2c.done();
+    }
+
+    #[test]
+    #[should_panic(expected = "i2c::transaction_end unexpected mode")]
+    fn transaction_error_rejects_trailing_expectations() {
+        let expectations = [
+            Transaction::transaction_start(0x76),
+            Transaction::write(0x76, vec![0x88]).with_error(ErrorKind::Other),
+            Transaction::write(0x76, vec![0xaa]),
+            Transaction::transaction_end(0x76),
+        ];
+        let mut i2c = Mock::new(&expectations);
+        let bytes = [0x88];
+        let more = [0xaa];
+        let mut operations = [i2c::Operation::Write(&bytes), i2c::Operation::Write(&more)];
+
+        let _ = i2c.transaction(0x76, &mut operations);
     }
 
     #[test]
