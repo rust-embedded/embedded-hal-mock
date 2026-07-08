@@ -470,6 +470,23 @@ mod test {
     }
 
     #[test]
+    #[should_panic(expected = "i2c::transaction_end unexpected mode")]
+    fn transaction_error_rejects_trailing_expectations() {
+        let expectations = [
+            Transaction::transaction_start(0x76),
+            Transaction::write(0x76, vec![0x88]).with_error(ErrorKind::Other),
+            Transaction::write(0x76, vec![0xaa]),
+            Transaction::transaction_end(0x76),
+        ];
+        let mut i2c = Mock::new(&expectations);
+        let bytes = [0x88];
+        let more = [0xaa];
+        let mut operations = [i2c::Operation::Write(&bytes), i2c::Operation::Write(&more)];
+
+        let _ = i2c.transaction(0x76, &mut operations);
+    }
+
+    #[test]
     #[should_panic(expected = "i2c::write data does not match expectation")]
     fn write_data_mismatch() {
         let expectations = [Transaction::write(0xaa, vec![1, 2])];
