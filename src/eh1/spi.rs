@@ -250,7 +250,7 @@ where
     ///
     /// This will cause an assertion if the read call does not match the next expectation
     fn read(&mut self, buffer: &mut [W]) -> Result<(), Self::Error> {
-        let w = self.next().expect("no expectation for spi::read call");
+        let w = self.next_expectation("no expectation for spi::read call");
         assert_eq!(w.expected_mode, Mode::Read, "spi::read unexpected mode");
         assert_eq!(
             buffer.len(),
@@ -268,7 +268,7 @@ where
     ///
     /// This will cause an assertion if the write call does not match the next expectation
     fn write(&mut self, buffer: &[W]) -> Result<(), Self::Error> {
-        let w = self.next().expect("no expectation for spi::write call");
+        let w = self.next_expectation("no expectation for spi::write call");
         assert_eq!(w.expected_mode, Mode::Write, "spi::write unexpected mode");
         assert_eq!(
             &w.expected_data, &buffer,
@@ -281,7 +281,7 @@ where
     }
 
     fn transfer(&mut self, read: &mut [W], write: &[W]) -> Result<(), Self::Error> {
-        let w = self.next().expect("no expectation for spi::transfer call");
+        let w = self.next_expectation("no expectation for spi::transfer call");
         assert_eq!(
             w.expected_mode,
             Mode::Transfer,
@@ -307,9 +307,7 @@ where
     ///
     /// This writes the provided response to the buffer and will cause an assertion if the written data does not match the next expectation
     fn transfer_in_place(&mut self, buffer: &mut [W]) -> Result<(), Self::Error> {
-        let w = self
-            .next()
-            .expect("no expectation for spi::transfer_in_place call");
+        let w = self.next_expectation("no expectation for spi::transfer_in_place call");
         assert_eq!(
             w.expected_mode,
             Mode::TransferInplace,
@@ -332,7 +330,7 @@ where
     }
 
     fn flush(&mut self) -> Result<(), Self::Error> {
-        let w = self.next().expect("no expectation for spi::flush call");
+        let w = self.next_expectation("no expectation for spi::flush call");
         assert_eq!(w.expected_mode, Mode::Flush, "spi::flush unexpected mode");
         Ok(())
     }
@@ -375,7 +373,7 @@ where
     ///
     /// This will call the nonblocking read/write primitives.
     fn write(&mut self, buffer: W) -> nb::Result<(), Self::Error> {
-        let data = self.next().expect("no expectation for spi::write call");
+        let data = self.next_expectation("no expectation for spi::write call");
         assert_eq!(
             data.expected_mode,
             Mode::Write,
@@ -395,7 +393,7 @@ where
     ///
     /// This will call the nonblocking read/write primitives.
     fn read(&mut self) -> nb::Result<W, Self::Error> {
-        let w = self.next().expect("no expectation for spi::read call");
+        let w = self.next_expectation("no expectation for spi::read call");
         assert_eq!(w.expected_mode, Mode::Read, "spi::Read unexpected mode");
         assert_eq!(
             1,
@@ -418,9 +416,7 @@ where
     ///
     /// This writes the provided response to the buffer and will cause an assertion if the written data does not match the next expectation
     fn transaction(&mut self, operations: &mut [Operation<'_, W>]) -> Result<(), Self::Error> {
-        let w = self
-            .next()
-            .expect("no expectation for spi::transaction call");
+        let w = self.next_expectation("no expectation for spi::transaction call");
         assert_eq!(
             w.expected_mode,
             Mode::TransactionStart,
@@ -444,7 +440,7 @@ where
                     SpiBus::transfer_in_place(self, buffer)?;
                 }
                 Operation::DelayNs(delay) => {
-                    let w = self.next().expect("no expectation for spi::delay call");
+                    let w = self.next_expectation("no expectation for spi::delay call");
                     assert_eq!(
                         w.expected_mode,
                         Mode::Delay(*delay),
@@ -454,9 +450,7 @@ where
             }
         }
 
-        let w = self
-            .next()
-            .expect("no expectation for spi::transaction call");
+        let w = self.next_expectation("no expectation for spi::transaction call");
         assert_eq!(
             w.expected_mode,
             Mode::TransactionEnd,
@@ -479,9 +473,7 @@ where
         &mut self,
         operations: &mut [Operation<'_, W>],
     ) -> Result<(), Self::Error> {
-        let w = self
-            .next()
-            .expect("no expectation for spi::transaction call");
+        let w = self.next_expectation("no expectation for spi::transaction call");
         assert_eq!(
             w.expected_mode,
             Mode::TransactionStart,
@@ -502,7 +494,7 @@ where
                     SpiBus::transfer_in_place(self, buffer)?;
                 }
                 Operation::DelayNs(delay) => {
-                    let w = self.next().expect("no expectation for spi::delay call");
+                    let w = self.next_expectation("no expectation for spi::delay call");
                     assert_eq!(
                         w.expected_mode,
                         Mode::Delay(*delay),
@@ -512,9 +504,7 @@ where
             }
         }
 
-        let w = self
-            .next()
-            .expect("no expectation for spi::transaction call");
+        let w = self.next_expectation("no expectation for spi::transaction call");
         assert_eq!(
             w.expected_mode,
             Mode::TransactionEnd,

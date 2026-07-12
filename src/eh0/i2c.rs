@@ -160,9 +160,7 @@ impl i2c::Read for Mock {
     type Error = MockError;
 
     fn read(&mut self, address: u8, buffer: &mut [u8]) -> Result<(), Self::Error> {
-        let e = self
-            .next()
-            .expect("no pending expectation for i2c::read call");
+        let e = self.next_expectation("no pending expectation for i2c::read call");
 
         assert_eq!(e.expected_mode, Mode::Read, "i2c::read unexpected mode");
         assert_eq!(e.expected_addr, address, "i2c::read address mismatch");
@@ -187,9 +185,7 @@ impl i2c::Write for Mock {
     type Error = MockError;
 
     fn write(&mut self, address: u8, bytes: &[u8]) -> Result<(), Self::Error> {
-        let e = self
-            .next()
-            .expect("no pending expectation for i2c::write call");
+        let e = self.next_expectation("no pending expectation for i2c::write call");
 
         assert_eq!(e.expected_mode, Mode::Write, "i2c::write unexpected mode");
         assert_eq!(e.expected_addr, address, "i2c::write address mismatch");
@@ -214,9 +210,7 @@ impl i2c::WriteRead for Mock {
         bytes: &[u8],
         buffer: &mut [u8],
     ) -> Result<(), Self::Error> {
-        let e = self
-            .next()
-            .expect("no pending expectation for i2c::write_read call");
+        let e = self.next_expectation("no pending expectation for i2c::write_read call");
 
         assert_eq!(
             e.expected_mode,
@@ -295,6 +289,15 @@ mod test {
         i2c.write(0xaa, &vec![10, 12]).unwrap();
 
         i2c.done();
+    }
+
+    #[test]
+    #[should_panic(expected = "no pending expectation for i2c::write call on display")]
+    fn labeled_write_missing_expectation() {
+        let expectations: [Transaction; 0] = [];
+        let mut i2c = Mock::with_label(&expectations, "display");
+
+        let _ = i2c.write(0xaa, &[]);
     }
 
     #[test]
