@@ -170,7 +170,7 @@ pub type CheckedDelay = Generic<Transaction>;
 
 impl delay::DelayNs for CheckedDelay {
     fn delay_ns(&mut self, ns: u32) {
-        let transaction = self.next_expectation("delay call");
+        let transaction = self.next_expectation("no expectation for delay call");
 
         match transaction.kind {
             TransactionKind::BlockingDelayNs(n) => assert_eq!(n, ns.into(), "wrong delay value"),
@@ -187,7 +187,7 @@ impl delay::DelayNs for CheckedDelay {
     }
 
     fn delay_us(&mut self, us: u32) {
-        let transaction = self.next_expectation("delay call");
+        let transaction = self.next_expectation("no expectation for delay call");
         match transaction.kind {
             TransactionKind::BlockingDelayNs(n) => {
                 assert_eq!(n, us as u64 * NANOS_PER_US, "wrong delay value")
@@ -206,7 +206,7 @@ impl delay::DelayNs for CheckedDelay {
     }
 
     fn delay_ms(&mut self, ms: u32) {
-        let transaction = self.next_expectation("delay call");
+        let transaction = self.next_expectation("no expectation for delay call");
         match transaction.kind {
             TransactionKind::BlockingDelayNs(n) => {
                 assert_eq!(n, ms as u64 * NANOS_PER_MS, "wrong delay value")
@@ -229,7 +229,7 @@ impl delay::DelayNs for CheckedDelay {
 #[cfg(feature = "embedded-hal-async")]
 impl embedded_hal_async::delay::DelayNs for CheckedDelay {
     async fn delay_ns(&mut self, ns: u32) {
-        let transaction = self.next_expectation("delay call");
+        let transaction = self.next_expectation("no expectation for delay call");
 
         match transaction.kind {
             TransactionKind::AsyncDelayNs(n) => assert_eq!(n, ns.into(), "delay unexpected value"),
@@ -246,7 +246,7 @@ impl embedded_hal_async::delay::DelayNs for CheckedDelay {
     }
 
     async fn delay_us(&mut self, us: u32) {
-        let transaction = self.next_expectation("delay call");
+        let transaction = self.next_expectation("no expectation for delay call");
         match transaction.kind {
             TransactionKind::AsyncDelayNs(n) => {
                 assert_eq!(n, us as u64 * NANOS_PER_US, "wrong delay value")
@@ -266,7 +266,7 @@ impl embedded_hal_async::delay::DelayNs for CheckedDelay {
     }
 
     async fn delay_ms(&mut self, ms: u32) {
-        let transaction = self.next_expectation("delay call");
+        let transaction = self.next_expectation("no expectation for delay call");
         match transaction.kind {
             TransactionKind::AsyncDelayNs(n) => {
                 assert_eq!(n, ms as u64 * NANOS_PER_MS, "wrong delay value")

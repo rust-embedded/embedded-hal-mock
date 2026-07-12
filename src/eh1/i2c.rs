@@ -193,9 +193,7 @@ impl ErrorType for Mock {
 
 impl I2c for Mock {
     fn read(&mut self, address: u8, buffer: &mut [u8]) -> Result<(), Self::Error> {
-        let e = self
-            .next()
-            .expect("no pending expectation for i2c::read call");
+        let e = self.next_expectation("no pending expectation for i2c::read call");
 
         assert_eq!(e.expected_mode, Mode::Read, "i2c::read unexpected mode");
         assert_eq!(e.expected_addr, address, "i2c::read address mismatch");
@@ -216,9 +214,7 @@ impl I2c for Mock {
     }
 
     fn write(&mut self, address: u8, bytes: &[u8]) -> Result<(), Self::Error> {
-        let e = self
-            .next()
-            .expect("no pending expectation for i2c::write call");
+        let e = self.next_expectation("no pending expectation for i2c::write call");
 
         assert_eq!(e.expected_mode, Mode::Write, "i2c::write unexpected mode");
         if !e.ignore_write {
@@ -240,9 +236,7 @@ impl I2c for Mock {
         bytes: &[u8],
         buffer: &mut [u8],
     ) -> Result<(), Self::Error> {
-        let e = self
-            .next()
-            .expect("no pending expectation for i2c::write_read call");
+        let e = self.next_expectation("no pending expectation for i2c::write_read call");
 
         assert_eq!(
             e.expected_mode,
@@ -277,9 +271,7 @@ impl I2c for Mock {
         address: u8,
         operations: &mut [i2c::Operation<'a>],
     ) -> Result<(), Self::Error> {
-        let w = self
-            .next()
-            .expect("no pending expectation for i2c::transaction call");
+        let w = self.next_expectation("no pending expectation for i2c::transaction call");
 
         assert_eq!(
             w.expected_mode,
@@ -295,9 +287,7 @@ impl I2c for Mock {
             .unwrap();
         }
 
-        let w = self
-            .next()
-            .expect("no pending expectation for i2c::transaction call");
+        let w = self.next_expectation("no pending expectation for i2c::transaction call");
 
         assert_eq!(
             w.expected_mode,
@@ -351,6 +341,15 @@ mod test {
         i2c.write(0xaa, &vec![10, 12]).unwrap();
 
         i2c.done();
+    }
+
+    #[test]
+    #[should_panic(expected = "no pending expectation for i2c::write call on display")]
+    fn labeled_write_missing_expectation() {
+        let expectations: [Transaction; 0] = [];
+        let mut i2c = Mock::with_label(&expectations, "display");
+
+        let _ = i2c.write(0xaa, &[]);
     }
 
     #[test]

@@ -207,7 +207,8 @@ impl ErrorType for Mock {
 impl OutputPin for Mock {
     /// Drives the pin low
     fn set_low(&mut self) -> Result<(), Self::Error> {
-        let Transaction { kind, err } = self.next_expectation("pin::set_low call");
+        let Transaction { kind, err } =
+            self.next_expectation("no expectation for pin::set_low call");
 
         assert_eq!(
             kind,
@@ -223,7 +224,8 @@ impl OutputPin for Mock {
 
     /// Drives the pin high
     fn set_high(&mut self) -> Result<(), Self::Error> {
-        let Transaction { kind, err } = self.next_expectation("pin::set_high call");
+        let Transaction { kind, err } =
+            self.next_expectation("no expectation for pin::set_high call");
 
         assert_eq!(
             kind,
@@ -243,7 +245,7 @@ impl InputPin for Mock {
     fn is_high(&mut self) -> Result<bool, Self::Error> {
         let mut s = self.clone();
 
-        let Transaction { kind, err } = s.next_expectation("pin::is_high call");
+        let Transaction { kind, err } = s.next_expectation("no expectation for pin::is_high call");
 
         assert!(kind.is_get(), "expected pin::get");
 
@@ -260,7 +262,7 @@ impl InputPin for Mock {
     fn is_low(&mut self) -> Result<bool, Self::Error> {
         let mut s = self.clone();
 
-        let Transaction { kind, err } = s.next_expectation("pin::is_low call");
+        let Transaction { kind, err } = s.next_expectation("no expectation for pin::is_low call");
 
         assert!(kind.is_get(), "expected pin::get");
 
@@ -278,7 +280,8 @@ impl InputPin for Mock {
 impl StatefulOutputPin for Mock {
     /// Toggle the pin low to high or high to low
     fn toggle(&mut self) -> Result<(), Self::Error> {
-        let Transaction { kind, err } = self.next_expectation("pin::toggle call");
+        let Transaction { kind, err } =
+            self.next_expectation("no expectation for pin::toggle call");
 
         assert_eq!(kind, TransactionKind::Toggle, "expected pin::toggle");
 
@@ -292,7 +295,8 @@ impl StatefulOutputPin for Mock {
     fn is_set_high(&mut self) -> Result<bool, Self::Error> {
         let mut s = self.clone();
 
-        let Transaction { kind, err } = s.next_expectation("pin::is_set_high call");
+        let Transaction { kind, err } =
+            s.next_expectation("no expectation for pin::is_set_high call");
 
         assert!(
             matches!(kind, TransactionKind::GetState(_)),
@@ -312,7 +316,8 @@ impl StatefulOutputPin for Mock {
     fn is_set_low(&mut self) -> Result<bool, Self::Error> {
         let mut s = self.clone();
 
-        let Transaction { kind, err } = s.next_expectation("pin::is_set_low call");
+        let Transaction { kind, err } =
+            s.next_expectation("no expectation for pin::is_set_low call");
 
         assert!(
             matches!(kind, TransactionKind::GetState(_)),
@@ -338,7 +343,8 @@ impl embedded_hal_async::digital::Wait for Mock {
     async fn wait_for_high(&mut self) -> Result<(), Self::Error> {
         let mut s = self.clone();
 
-        let Transaction { kind, err } = s.next_expectation("pin::wait_for_high call");
+        let Transaction { kind, err } =
+            s.next_expectation("no expectation for pin::wait_for_high call");
 
         assert!(
             matches!(
@@ -360,7 +366,8 @@ impl embedded_hal_async::digital::Wait for Mock {
     async fn wait_for_low(&mut self) -> Result<(), Self::Error> {
         let mut s = self.clone();
 
-        let Transaction { kind, err } = s.next_expectation("pin::wait_for_low call");
+        let Transaction { kind, err } =
+            s.next_expectation("no expectation for pin::wait_for_low call");
 
         assert!(
             matches!(
@@ -382,7 +389,8 @@ impl embedded_hal_async::digital::Wait for Mock {
     async fn wait_for_rising_edge(&mut self) -> Result<(), Self::Error> {
         let mut s = self.clone();
 
-        let Transaction { kind, err } = s.next_expectation("pin::wait_for_rising_edge call");
+        let Transaction { kind, err } =
+            s.next_expectation("no expectation for pin::wait_for_rising_edge call");
 
         assert!(
             matches!(
@@ -404,7 +412,8 @@ impl embedded_hal_async::digital::Wait for Mock {
     async fn wait_for_falling_edge(&mut self) -> Result<(), Self::Error> {
         let mut s = self.clone();
 
-        let Transaction { kind, err } = s.next_expectation("pin::wait_for_falling_edge call");
+        let Transaction { kind, err } =
+            s.next_expectation("no expectation for pin::wait_for_falling_edge call");
 
         assert!(
             matches!(
@@ -426,7 +435,8 @@ impl embedded_hal_async::digital::Wait for Mock {
     async fn wait_for_any_edge(&mut self) -> Result<(), Self::Error> {
         let mut s = self.clone();
 
-        let Transaction { kind, err } = s.next_expectation("pin::wait_for_any_edge call");
+        let Transaction { kind, err } =
+            s.next_expectation("no expectation for pin::wait_for_any_edge call");
 
         assert!(
             matches!(

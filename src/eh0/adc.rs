@@ -129,7 +129,7 @@ where
     type Error = MockError;
 
     fn read(&mut self, _pin: &mut Pin) -> nb::Result<T, Self::Error> {
-        let w = self.next().expect("unexpected read call");
+        let w = self.next_expectation("unexpected read call");
         assert_eq!(w.expected_chan, Pin::channel(), "unexpected channel");
         match w.err {
             Some(e) => Err(nb::Error::Other(e)),
@@ -155,6 +155,15 @@ mod test {
         assert_eq!(0xabcdu16, adc.read(&mut MockChan0 {}).unwrap());
 
         adc.done();
+    }
+
+    #[test]
+    #[should_panic(expected = "unexpected read call on sensor")]
+    fn test_labeled_adc_missing_expectation() {
+        let expectations: [Transaction<u16>; 0] = [];
+        let mut adc = Mock::with_label(&expectations, "sensor");
+
+        let _ = adc.read(&mut MockChan0 {});
     }
 
     #[test]

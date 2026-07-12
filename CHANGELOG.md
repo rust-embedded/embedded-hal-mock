@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 - Support mocked SPI transaction errors (#131)
-- Support optional labels for mock expectation failure messages (#43)
+- Support optional labels for missing-expectation failure messages (#43)
 
 ### Fixed
 

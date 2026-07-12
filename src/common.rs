@@ -43,8 +43,8 @@ where
 
     /// Create a new labeled mock interface.
     ///
-    /// Labels are included in expectation failure messages to make tests with
-    /// multiple mocks easier to debug.
+    /// Labels are included in missing-expectation failure messages to make
+    /// tests with multiple mocks easier to debug.
     pub fn with_label<E, L>(expected: E, label: L) -> Generic<T>
     where
         E: IntoIterator<Item = &'a T>,
@@ -70,16 +70,11 @@ where
 
     /// Return the next expectation, or panic with a message that includes the
     /// mock label when one was provided.
-    pub(crate) fn next_expectation(&mut self, call: &str) -> T {
-        self.next()
-            .unwrap_or_else(|| panic!("{}", self.no_expectation_message(call)))
-    }
-
-    fn no_expectation_message(&self, call: &str) -> String {
-        match &self.label {
-            Some(label) => format!("no expectation for {call} on {label}"),
-            None => format!("no expectation for {call}"),
-        }
+    pub(crate) fn next_expectation(&mut self, message: &str) -> T {
+        self.next().unwrap_or_else(|| match &self.label {
+            Some(label) => panic!("{message} on {label}"),
+            None => panic!("{message}"),
+        })
     }
 
     /// Update expectations on the interface
@@ -254,7 +249,7 @@ mod tests {
             let expectations: [u8; 0] = [];
             let mut mock: Generic<u8> = Generic::new(&expectations);
 
-            mock.next_expectation("test call");
+            mock.next_expectation("no expectation for test call");
         }
 
         #[test]
@@ -263,7 +258,7 @@ mod tests {
             let expectations: [u8; 0] = [];
             let mut mock: Generic<u8> = Generic::with_label(&expectations, "my_label");
 
-            mock.next_expectation("test call");
+            mock.next_expectation("no expectation for test call");
         }
     }
 }
